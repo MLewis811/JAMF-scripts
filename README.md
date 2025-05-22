@@ -3,7 +3,7 @@
 Scripts to perform various tasks for JAMF School, and the template for a CSV file that works with the scripts.
 
 | Script | Description | Required CSV Field(s) |
-| --- | --- | --- |
+| --- | --- | :---: |
 | removeUsersFromDevices.py | Reads a list of serial numbers from csv and removes the users in JAMF | serial_number |
 
 ## Configuration
