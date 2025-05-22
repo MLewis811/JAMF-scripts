@@ -14,7 +14,7 @@ API_HEADERS = {
     "Authorization": f"Basic {API_TOKEN}",
     "Content-Type": "application/json"
 }
-CSV_FILE = "serial_numbers.csv"  # Your input file
+CSV_FILE = "jamfscriptinput.csv"  # Your input file
 
 
 ADD_TO_GROUP_API_URL = f"{BASEURL}/devices/groups/add"
