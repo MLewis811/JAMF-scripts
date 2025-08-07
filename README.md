@@ -5,6 +5,7 @@ Scripts to perform various tasks for JAMF School, and the template for a CSV fil
 | Script | Description | Required CSV Field(s) |
 | --- | --- | :---: |
 | removeUsersFromDevices.py | Reads a list of serial numbers from csv and removes the users in JAMF | serial_number |
+| wipeDevices.py | Reads a list of serial numbers from csv and sends the command to wipe the device | serial_number |
 
 ## Configuration
 
