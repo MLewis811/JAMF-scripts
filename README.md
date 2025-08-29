@@ -4,6 +4,10 @@ Scripts to perform various tasks for JAMF School, and the template for a CSV fil
 
 | Script | Description | Required CSV Field(s) |
 | --- | --- | :---: |
+| assignUsersToDevices.py | Reads a list of serial numbers, device owner names (in "Lastname, Firstname" format), and device group names from csv. Assigns the owner to the device (creating a user if needed), and places the device in the group (creating the group if needed). Usernames will be in "Firstname Lastname" format. | serial_number, last_first, group |
+| clearPasscodes.py | Retrieves all devices in JAMF and prints out serial numbers of those with passcodes. **DOES NOT CURRENTLY CLEAR ANY PASSCODES** | - |
+| createClasses.py | Reads a list of device group names from csv and device owner names (in "Lastname, Firstname" format) and places users in a new class. It is assumed that the teacher will be listed first, followed by students in the teacher's class. Teachers must have the group "Staff iPads". | group, last_first |
+| removeDevicesFromGroups.py | Reads a list of serial numbers and groups from csv and removes the devices from the specified group. **THIS SCRIPT DOES NOT WORK IN ITS CURRENT FORM** | serial_number, group |
 | removeUsersFromDevices.py | Reads a list of serial numbers from csv and removes the users in JAMF | serial_number |
 | wipeDevices.py | Reads a list of serial numbers from csv and sends the command to wipe the device | serial_number |
 
