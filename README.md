@@ -9,6 +9,7 @@ Scripts to perform various tasks for JAMF School, and the template for a CSV fil
 | createClasses.py | Reads a list of device group names from csv and device owner names (in "Lastname, Firstname" format) and places users in a new class. It is assumed that the teacher will be listed first, followed by students in the teacher's class. Teachers must have the group "Staff iPads". | group, last_first |
 | removeDevicesFromGroups.py | Reads a list of serial numbers and groups from csv and removes the devices from the specified group. **THIS SCRIPT DOES NOT WORK IN ITS CURRENT FORM** | serial_number, group |
 | removeUsersFromDevices.py | Reads a list of serial numbers from csv and removes the users in JAMF | serial_number |
+| removeWhitespaceFromUsers.py | Retrieves all users in JAMF. If any users have leading or trailing whitespace in the Firstname, Lastname, or Username fields, removes it and updates the user in JAMF | - |
 | wipeDevices.py | Reads a list of serial numbers from csv and sends the command to wipe the device | serial_number |
 
 ## Configuration
