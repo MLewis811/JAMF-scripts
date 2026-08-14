@@ -25,9 +25,10 @@ GET_CLASSES_API_URL = f"{BASEURL}/classes"
 def read_data_from_csv(filepath):
     """Read names from a column 'last_first'."""
     names = []
-    """Read groups from a column 'group'."""
-    groups = []
-
+    """Read classes from a column 'class_name'."""
+    classes = []
+    """Read roles from a column 'role'."""
+    roles = []
 
     with open(filepath, newline="") as csvfile:
         reader = csv.DictReader(csvfile)
@@ -35,9 +36,12 @@ def read_data_from_csv(filepath):
             name = row.get("last_first")
             names.append(name)
 
-            group = row.get("group")
-            groups.append(group)
-    return names, groups
+            class_name = row.get("class_name")
+            classes.append(class_name)
+
+            role = row.get("role")
+            roles.append(role)
+    return classes, names,  roles
 
 def get_users():
     response = requests.get(f"{GET_USERS_API_URL}", headers=API_HEADERS)
@@ -55,12 +59,31 @@ def get_userId_by_username(name, users):
         if user["username"] == name:
             return(user["id"])
         
+    print(f"*** UserID not found for {name}")
     return None
 
 def make_lastFirst_into_firstLast(name):
     last, first = name.split(",")
     new_name = f"{first.strip()} {last.strip()}"
     return new_name
+
+def createClassByName(className, tchrs):
+    print(f"Creating class {className} with teachers {tchrs}")
+    payload = {
+        "name": className,
+        "teachers": tchrs
+    }
+    response = requests.post(f"{CREATE_CLASSES_API_URL}", json=payload, headers=API_HEADERS)
+    if response.status_code == 200:
+        responseData = response.json()
+        uuid = responseData["uuid"]
+        print(f"Created class {uuid}")
+        return uuid
+    else:
+        print("Failed to create class")
+        print(response.text)
+        return None
+
 
 def createClass(tchrID, tchrLast):
     className = f"2526 {tchrLast}"
@@ -114,33 +137,61 @@ def main():
     # If a filename is given on the command line, use it; otherwise use default
     csv_file = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_CSV_FILE
 
-    names, groups = read_data_from_csv(csv_file)
+    classes, names, roles = read_data_from_csv(csv_file)
+
+    curr_class = ""
+    tchrIDs = []
+    studentNames = []
+    errors = []
 
     for i, name in enumerate(names):
-        if groups[i] == "Staff iPads":
-            tchrLastFirst = name
-            tchrLast, tchrFirst = tchrLastFirst.split(",")
-            tchrFirstLast = make_lastFirst_into_firstLast(tchrLastFirst)
-            tchrID = get_userId_by_username(tchrFirstLast, users)
-            classUUID = createClass(tchrID, tchrLast.strip())
-            if classUUID:
-                userGroupID = getUserGroupIDForClassByUUID(classUUID)
-                print(userGroupID)
-        else:
-            studentLastFirst = name
-            studentFirstLast = make_lastFirst_into_firstLast(studentLastFirst)
-            studentID = get_userId_by_username(studentFirstLast, users)
-            if studentID:
-                print(f"Adding {studentLastFirst} to class {classUUID}")
-                addUserAsStudentToClass(studentID, classUUID)
+        class_name = classes[i]
+        role = roles[i]
 
+        if class_name != curr_class:
+            # We are starting a new class group
 
+            if curr_class != "":
+                # Finish processing the previous class
+                class_id = createClassByName(curr_class, tchrIDs)
 
+                for s_name in studentNames:
+                    s_id = get_userId_by_username(s_name, users)
+                    if s_id is not None:
+                        addUserAsStudentToClass(s_id, class_id)
+                    else:
+                        errors.append(f"{s_name} not added to {curr_class}")
+            
+            # Start tracking a new class
+            curr_class = class_name
+            tchrIDs = []
+            studentNames = []
 
+        if role == "teacher":
+            tName_firstLast= make_lastFirst_into_firstLast(name)
+            t_id = get_userId_by_username(tName_firstLast, users)
+            tchrIDs.append(t_id)
+        elif role == "student":
+            sName_firstLast = make_lastFirst_into_firstLast(name)
+            studentNames.append(sName_firstLast)
+
+    if curr_class != "":
+        class_id = createClassByName(curr_class, tchrIDs)
+
+        for s_name in studentNames:
+            s_id = get_userId_by_username(s_name, users)
+            if s_id is not None:
+                addUserAsStudentToClass(s_id, class_id)
             else:
-                print(f"************* student not found: {studentLastFirst}")
+                errors.append(f"{s_name} not added to {curr_class}")
 
 
+    if errors:
+        print("******* ERRORS ********")
+        for error in errors:
+            print(error)
+    else:
+        print("No errors!")
 
 if __name__ == "__main__":
     main()
