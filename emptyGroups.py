@@ -17,6 +17,7 @@ SERIAL_TO_UDID_API_URL = f"{BASEURL}/devices/"
 GET_DEVICES_API_URL = f"{BASEURL}/devices/"
 GET_GROUPS_API_URL = f"{BASEURL}/devices/groups"
 ADD_TO_GROUP_API_URL = f"{BASEURL}/devices/groups/add"
+REMOVE_DEVICE_FROM_GROUP_API_URL = f"{BASEURL}/devices/groups/remove"
 
 def get_devices():
     response = requests.get(f"{GET_DEVICES_API_URL}", headers=API_HEADERS)
@@ -98,6 +99,23 @@ def assign_device_to_group_by_udid(groupId, udid):
         print(payload)
         print(response.text)
         return False
+    
+def remove_devices_from_group_by_udid(udids, group_id):
+    if not udids:
+        print("No devices to remove!")
+        return
+    
+    payload = {
+        "groupId": group_id,
+	    "udids" : udids
+	} 
+    response = requests.post(REMOVE_DEVICE_FROM_GROUP_API_URL, json=payload, headers=API_HEADERS)
+    if response.status_code == 200:
+        print("Successfully removed devices from the group.")
+    else:
+        print(f"Failed to remove devices to the group: {response.status_code}")
+        print(response.text)
+        
 
 def main():
     devices = get_devices()
@@ -112,17 +130,15 @@ def main():
     groupsToEmpty = read_data_from_csv(csv_file)
     for groupName in groupsToEmpty:
         groupId = get_groupId_by_name(groupName, groups)
-        print(f"Devices with group ID {groupId}")
+        # print(f"Devices with group ID {groupId}")
         devicesInGroup = [
-            device["serialNumber"] for device in devices
+            device["UDID"] for device in devices
             if groupId in device.get("groupIds", [])
         ]
+        # print(devicesInGroup)
 
-    print(devicesInGroup)
+        remove_devices_from_group_by_udid(devicesInGroup, groupId)
 
-    for device in devices:
-        if device["serialNumber"] == "L3006TJFCN":
-            print(device["groupIds"])
 
 if __name__ == "__main__":
     main()
